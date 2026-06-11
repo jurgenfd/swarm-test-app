@@ -16,8 +16,10 @@ load-balancing van Swarm direct ziet.
 
 > Getest op macOS (Apple Silicon, Multipass 1.16.3, Ubuntu 26.04 LTS,
 > Docker 29.5.3) op 11-06-2026. Ook getest op Windows 10 Education
-> (Hyper-V, Multipass 1.16.3, Ubuntu 24.04 LTS, Docker 29.5.3) op
-> 11-06-2026 — alle stappen inclusief curl-tests vanaf de host werken
+> (Hyper-V, Multipass 1.16.3, Ubuntu 24.04 LTS, Docker 29.5.3) en
+> Windows 11 Pro (Hyper-V, Multipass 1.16.3, Ubuntu 26.04 LTS,
+> Docker 29.5.3), beide op 11-06-2026 — alle stappen inclusief
+> curl-tests vanaf de host (load-balancing én routing mesh) werken
 > ongewijzigd.
 
 ## 0. Host-setup (eenmalig): Multipass installeren
@@ -46,9 +48,11 @@ Download de installer van <https://canonical.com/multipass/install> en let op
 de hypervisor:
 
 - **Windows 10/11 Pro/Enterprise/Education**: Multipass gebruikt Hyper-V (aanzetten via
-  "Windows-onderdelen in- of uitschakelen" als dat nog niet aanstaat). VM-IP's
-  zijn direct bereikbaar vanaf de host — de curl-tests hieronder werken dan
-  ongewijzigd.
+  "Windows-onderdelen in- of uitschakelen" als dat nog niet aanstaat; daarna is
+  een **herstart** vereist — zonder herstart bestaat de Hyper-V-service nog
+  niet en faalt `multipass launch` met "The Hyper-V service does not exist").
+  VM-IP's zijn direct bereikbaar vanaf de host — de curl-tests hieronder werken
+  dan ongewijzigd.
 - **Windows Home**: geen Hyper-V; Multipass valt terug op VirtualBox. De
   VM-netwerken zijn dan standaard NAT, waardoor de VM-IP's uit
   `multipass list` mogelijk **niet** direct bereikbaar zijn vanaf de host.
