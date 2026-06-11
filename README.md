@@ -14,13 +14,17 @@ Zie [architecture.puml](architecture.puml) voor het volledige architectuurdiagra
 Elke app-replica antwoordt met zijn eigen container-hostname, zodat je de
 load-balancing van Swarm direct ziet.
 
-> Getest op macOS (Apple Silicon, Multipass 1.16.3, Ubuntu 26.04 LTS,
-> Docker 29.5.3) op 11-06-2026. Ook getest op Windows 10 Education
-> (Hyper-V, Multipass 1.16.3, Ubuntu 24.04 LTS, Docker 29.5.3) en
-> Windows 11 Pro (Hyper-V, Multipass 1.16.3, Ubuntu 26.04 LTS,
-> Docker 29.5.3), beide op 11-06-2026 — alle stappen inclusief
-> curl-tests vanaf de host (load-balancing én routing mesh) werken
-> ongewijzigd.
+## Geteste platformen
+
+Alle drie de platformen zijn getest op 11-06-2026 met Multipass 1.16.3,
+Ubuntu 26.04 LTS en Docker 29.5.3. Alle stappen, inclusief de curl-tests
+vanaf de host (load-balancing én routing mesh), werken ongewijzigd.
+
+### macOS - Apple Silicon.
+
+### Windows 10 Education - Hyper-V.
+
+### Windows 11 Pro - Hyper-V.
 
 ## 0. Host-setup (eenmalig): Multipass installeren
 
