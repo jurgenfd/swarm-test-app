@@ -15,8 +15,10 @@ Elke app-replica antwoordt met zijn eigen container-hostname, zodat je de
 load-balancing van Swarm direct ziet.
 
 > Getest op macOS (Apple Silicon, Multipass 1.16.3, Ubuntu 26.04 LTS,
-> Docker 29.5.3) op 11-06-2026. Windows: zie de setup-sectie hieronder,
-> nog niet getest.
+> Docker 29.5.3) op 11-06-2026. Ook getest op Windows 10 Education
+> (Hyper-V, Multipass 1.16.3, Ubuntu 24.04 LTS, Docker 29.5.3) op
+> 11-06-2026 — alle stappen inclusief curl-tests vanaf de host werken
+> ongewijzigd.
 
 ## 0. Host-setup (eenmalig): Multipass installeren
 
@@ -38,12 +40,12 @@ Controle:
 multipass version
 ```
 
-### Windows (voorbereid, nog niet getest)
+### Windows
 
 Download de installer van <https://canonical.com/multipass/install> en let op
 de hypervisor:
 
-- **Windows 10/11 Pro/Enterprise**: Multipass gebruikt Hyper-V (aanzetten via
+- **Windows 10/11 Pro/Enterprise/Education**: Multipass gebruikt Hyper-V (aanzetten via
   "Windows-onderdelen in- of uitschakelen" als dat nog niet aanstaat). VM-IP's
   zijn direct bereikbaar vanaf de host — de curl-tests hieronder werken dan
   ongewijzigd.
