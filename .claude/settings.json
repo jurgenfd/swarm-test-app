@@ -7,10 +7,14 @@
       "Bash(multipass list *)",
       "Bash(command -v brew)",
       "Bash(brew --version)",
-      "Bash(sudo -n true)",
       "Bash(echo \"user: $\\(whoami\\)\"; id -Gn | tr ' ' '\\\\n' | grep -x admin && echo \"→ currently ADMIN\" || echo \"→ currently standard user \\(no admin\\)\"; ls -d /Applications/Privileges.app 2>/dev/null && echo \"→ Privileges app installed\")",
       "Read(//Applications/Privileges.app/**)",
-      "Bash(multipass launch *)"
+      "Bash(multipass launch *)",
+      "Bash(multipass exec *)",
+      "Bash(multipass transfer *)",
+      "Bash(curl -s --max-time 5 http://192.168.252.2:8080)",
+      "Bash(curl -s --max-time 5 http://192.168.252.3:8080)",
+      "Bash(pkill -f \"multipass exec swarm-manager -- sudo docker service scale\")"
     ]
   }
 }
