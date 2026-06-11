@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(command -v plantuml)",
+      "Bash(plantuml -checkonly /Users/jd/Avans/_Modules/Periode3/swarm-test-app/architecture.puml)",
+      "Bash(command -v multipass)",
+      "Bash(multipass list *)",
+      "Bash(command -v brew)",
+      "Bash(brew --version)",
+      "Bash(sudo -n true)",
+      "Bash(echo \"user: $\\(whoami\\)\"; id -Gn | tr ' ' '\\\\n' | grep -x admin && echo \"→ currently ADMIN\" || echo \"→ currently standard user \\(no admin\\)\"; ls -d /Applications/Privileges.app 2>/dev/null && echo \"→ Privileges app installed\")",
+      "Read(//Applications/Privileges.app/**)",
+      "Bash(multipass launch *)"
+    ]
+  }
+}

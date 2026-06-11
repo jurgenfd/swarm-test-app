@@ -1,0 +1,61 @@
+@startuml architecture
+title Swarm test-app — systeemarchitectuur (stack "demo")
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+
+actor "browser / curl\n(host-laptop)" as client
+
+node "Docker Swarm (overlay-netwerk)" {
+
+  node "swarm-manager (Multipass VM)" as manager {
+    portin ":8080" as mport
+    component "web\nnginx:alpine\n1 replica" as web
+    component "app-replica\npython:3.12-alpine" as app1
+    component "app-replica\npython:3.12-alpine" as app2
+    artifact "configs\napp_py (app.py)\nnginx_conf (nginx.conf)" as configs
+  }
+
+  node "swarm-worker (Multipass VM)" as worker {
+    portin ":8080" as wport
+    component "app-replica\npython:3.12-alpine" as app3
+    component "app-replica\npython:3.12-alpine" as app4
+  }
+
+  interface "service-DNS \"app\"\n(VIP, intern load-balancen)" as vip
+}
+
+client --> mport : HTTP GET :8080
+client --> wport : HTTP GET :8080\n(routing mesh)
+
+mport --> web : routing mesh\n→ poort 80
+wport --> web : routing mesh\n→ poort 80
+
+web --> vip : proxy_pass\nhttp://app:8000
+
+vip --> app1 : :8000
+vip --> app2 : :8000
+vip --> app3 : :8000
+vip --> app4 : :8000
+
+configs ..> web : nginx.conf
+configs ..> app1 : app.py
+configs ..> app2 : app.py
+configs ..> app3 : app.py
+configs ..> app4 : app.py
+
+note right of vip
+  Swarm load-balanced requests
+  over alle app-replicas; elke
+  replica antwoordt met zijn
+  eigen container-hostname.
+end note
+
+note bottom of worker
+  Replica-verdeling over de nodes is
+  indicatief — Swarm plaatst de 4
+  replicas zelf (docker service ps demo_app).
+end note
+
+@enduml

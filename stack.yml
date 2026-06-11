@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  app:
+    image: python:3.12-alpine
+    command: python /app.py
+    configs:
+      - source: app_py
+        target: /app.py
+    deploy:
+      replicas: 4
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 64M
+
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    configs:
+      - source: nginx_conf
+        target: /etc/nginx/nginx.conf
+    deploy:
+      replicas: 1
+
+configs:
+  app_py:
+    file: ./app.py
+  nginx_conf:
+    file: ./nginx.conf
