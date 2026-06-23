@@ -16,15 +16,17 @@ load-balancing van Swarm direct ziet.
 
 ## Geteste platformen
 
-Alle drie de platformen zijn getest op 11-06-2026 met Multipass 1.16.3,
-Ubuntu 26.04 LTS en Docker 29.5.3. Alle stappen, inclusief de curl-tests
-vanaf de host (load-balancing én routing mesh), werken ongewijzigd.
+Alle vier de platformen zijn getest met Multipass 1.16.3, Ubuntu 26.04 LTS
+en Docker 29.5.3/29.6.0. Alle stappen, inclusief de curl-tests vanaf de host
+(load-balancing én routing mesh), werken ongewijzigd.
 
-### macOS - Apple Silicon.
+### macOS - Apple Silicon (getest 11-06-2026).
 
-### Windows 10 Education - Hyper-V.
+### Windows 10 Education - Hyper-V (getest 11-06-2026).
 
-### Windows 11 Pro - Hyper-V.
+### Windows 11 Pro - Hyper-V (getest 11-06-2026).
+
+### Windows 11 Home - VirtualBox (getest 23-06-2026).
 
 ## 0. Host-setup (eenmalig): Multipass installeren
 
@@ -46,35 +48,87 @@ Controle:
 multipass version
 ```
 
-### Windows
+### Windows 10/11 Pro/Enterprise/Education
 
-Download de installer van <https://canonical.com/multipass/install> en let op
-de hypervisor:
+Download de installer van <https://canonical.com/multipass/install>.
+Multipass gebruikt Hyper-V: zet dit aan via "Windows-onderdelen in- of
+uitschakelen" als het nog niet aanstaat, daarna is een **herstart** vereist —
+zonder herstart bestaat de Hyper-V-service nog niet en faalt `multipass launch`
+met "The Hyper-V service does not exist". VM-IP's zijn direct bereikbaar vanaf
+de host; alle commando's hieronder werken ongewijzigd.
 
-- **Windows 10/11 Pro/Enterprise/Education**: Multipass gebruikt Hyper-V (aanzetten via
-  "Windows-onderdelen in- of uitschakelen" als dat nog niet aanstaat; daarna is
-  een **herstart** vereist — zonder herstart bestaat de Hyper-V-service nog
-  niet en faalt `multipass launch` met "The Hyper-V service does not exist").
-  VM-IP's zijn direct bereikbaar vanaf de host — de curl-tests hieronder werken
-  dan ongewijzigd.
-- **Windows Home**: geen Hyper-V; Multipass valt terug op VirtualBox. De
-  VM-netwerken zijn dan standaard NAT, waardoor de VM-IP's uit
-  `multipass list` mogelijk **niet** direct bereikbaar zijn vanaf de host.
-  De stappen *binnen* de VM's (swarm init/join, deploy, schalen) werken
-  identiek; voor de curl-test vanaf de host is extra netwerkconfiguratie
-  nodig (port forwarding of een host-only adapter), of test je met curl
-  vanuit een van de VM's zelf.
+### Windows Home
 
-Alle commando's hieronder zijn verder identiek op macOS en Windows
+> **Tip voor studenten:** via **Azure Dev Tools for Teaching** (voorheen Azure
+> Education / Azure for Students) kun je Windows 11 Education (N) gratis
+> downloaden en als upgrade installeren. Education heeft wél Hyper-V, waardoor
+> je de eenvoudigere Hyper-V-instructies hierboven kunt volgen. Kijk op
+> <https://azureforeducation.microsoft.com/devtools> of je instelling
+> deelneemt.
+
+Windows Home heeft geen Hyper-V. Multipass gebruikt dan VirtualBox, dat je
+**apart moet installeren** vóór je Multipass installeert:
+
+```
+winget install Oracle.VirtualBox
+winget install Canonical.Multipass
+```
+
+Of download beide installers handmatig:
+- VirtualBox: <https://www.virtualbox.org/wiki/Downloads>
+- Multipass: <https://canonical.com/multipass/install>
+
+Open na de installatie een **nieuw** terminalvenster zodat `multipass` in het
+PATH staat.
+
+**Eerste start kan time-outen.** Bij de allereerste `multipass launch` kan de
+VM een time-out geven terwijl de VirtualBox-kernel-driver zich initialiseert.
+De foutmelding eindigt op `launch failed: Could not start VM: Process operation
+timed out`. Herstel:
+
+```
+# PowerShell (als administrator)
+Restart-Service Multipass
+```
+
+Probeer `multipass launch` daarna opnieuw; de tweede poging slaagt wel.
+
+**Netwerk: gebruik `--network` bij aanmaken van de VM's.** Zonder extra vlag
+krijgen beide VM's hetzelfde NAT-adres (`10.0.2.15`) en kunnen ze elkaar niet
+bereiken. Voeg de WiFi- of Ethernet-adapter van de host toe als bridged
+interface (zie stap 1 hieronder); dan krijgt elke VM een eigen IP op je
+lokale netwerk en werken ook de curl-tests vanaf de host ongewijzigd.
+
+Controleer welke adapternamen beschikbaar zijn:
+
+```
+multipass networks
+```
+
+Typische uitvoer: `WiFi` en `Ethernet`. Gebruik de naam die actief is op jouw
+host (zie stap 1).
+
+Alle overige commando's zijn identiek op macOS en Windows
 (Terminal/PowerShell maakt geen verschil).
 
 ## 1. VM's aanmaken en Docker installeren
 
 Twee Ubuntu-VM's aanmaken (2 CPU / 2 GB is ruim voldoende voor dit lab):
 
+**macOS en Windows (Hyper-V):**
+
 ```
 multipass launch --name swarm-manager --cpus 2 --memory 2G --disk 8G
 multipass launch --name swarm-worker  --cpus 2 --memory 2G --disk 8G
+```
+
+**Windows Home (VirtualBox):** voeg `--network <adapter>` toe zodat elke VM
+een eigen IP krijgt op je lokale netwerk. Vervang `WiFi` door `Ethernet` als
+de host via kabel verbonden is:
+
+```
+multipass launch --name swarm-manager --cpus 2 --memory 2G --disk 8G --network WiFi
+multipass launch --name swarm-worker  --cpus 2 --memory 2G --disk 8G --network WiFi
 ```
 
 De eerste launch downloadt het Ubuntu-image en duurt een paar minuten.
@@ -106,6 +160,16 @@ IP van de manager opzoeken:
 ```
 multipass list
 ```
+
+**Windows Home:** `multipass list` toont `172.17.0.1` (de Docker bridge) in
+plaats van het echte VM-adres. Gebruik dit commando om alle interfaces te zien:
+
+```
+multipass exec swarm-manager -- hostname -I
+```
+
+De uitvoer bevat meerdere IP's (`10.0.2.15` is NAT, `172.17.0.1` is Docker).
+Gebruik het adres in het bereik van je thuisnetwerk, bijv. `192.168.x.x`.
 
 Op de manager (`multipass shell swarm-manager`):
 
@@ -140,8 +204,9 @@ curl http://<manager-IP>:8080      # paar keer herhalen
 
 Elke request geeft een andere hostname terug → Swarm load-balanced over de
 replicas. Ook `http://<worker-IP>:8080` werkt, óók als nginx daar niet draait:
-dat is de **routing mesh**. (Windows Home/VirtualBox: zie de noot bij de
-host-setup als de VM-IP's niet bereikbaar zijn.)
+dat is de **routing mesh**. Bij Windows Home werkt dit alleen als de VM's
+aangemaakt zijn met `--network` (zie stap 1); zonder die vlag zijn de
+VM-IP's niet bereikbaar vanaf de host.
 
 ## 6. Schalen
 
